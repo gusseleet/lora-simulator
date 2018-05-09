@@ -1,0 +1,362 @@
+syntax = "proto3";
+
+package api;
+
+// for grpc-gateway
+import "google/api/annotations.proto";
+import "common.proto";
+
+
+// Device is the service managing the devices.
+service Device {
+    // Create creates the given device.
+    rpc Create(CreateDeviceRequest) returns (CreateDeviceResponse) {
+        option(google.api.http) = {
+            post: "/api/devices"
+            body: "*"
+        };
+    }
+
+    // Get returns the device matching the given DevEUI.
+    rpc Get(GetDeviceRequest) returns (GetDeviceResponse) {
+        option (google.api.http) = {
+            get: "/api/devices/{devEUI}"
+        };
+    }
+
+    // Delete deletes the device matching the given DevEUI.
+    rpc Delete(DeleteDeviceRequest) returns (DeleteDeviceResponse) {
+        option (google.api.http) = {
+            delete: "/api/devices/{devEUI}"
+        };
+    }
+
+    // ListByApplicationID lists the devices by the given application ID, sorted by the name of the device.
+    rpc ListByApplicationID(ListDeviceByApplicationIDRequest) returns (ListDeviceResponse) {
+        option (google.api.http) = {
+            get: "/api/applications/{applicationID}/devices"
+        };
+    }
+
+    // Update updates the device matching the given DevEUI.
+    rpc Update(UpdateDeviceRequest) returns (UpdateDeviceResponse) {
+        option (google.api.http) = {
+            put: "/api/devices/{devEUI}"
+            body: "*"
+        };
+    }
+
+    // CreateKeys creates the given device-keys.
+    rpc CreateKeys(CreateDeviceKeysRequest) returns (CreateDeviceKeysResponse) {
+        option (google.api.http) = {
+            post: "/api/devices/{devEUI}/keys"
+            body: "*"
+        };
+    }
+
+    // GetKeys returns the device-keys for the given DevEUI.
+    rpc GetKeys(GetDeviceKeysRequest) returns (GetDeviceKeysResponse) {
+        option (google.api.http) = {
+            get: "/api/devices/{devEUI}/keys"
+        };
+    }
+
+    // UpdateKeys updates the device-keys.
+    rpc UpdateKeys(UpdateDeviceKeysRequest) returns (UpdateDeviceKeysResponse) {
+        option (google.api.http) = {
+            put: "/api/devices/{devEUI}/keys"
+            body: "*"
+        };
+    }
+
+    // DeleteKeys deletes the device-keys for the given DevEUI.
+    rpc DeleteKeys(DeleteDeviceKeysRequest) returns (DeleteDeviceKeysResponse) {
+        option (google.api.http) = {
+            delete: "/api/devices/{devEUI}/keys"
+        };
+    };
+
+    // Activate (re)activates the device (only when ABP is set to true).
+    rpc Activate(ActivateDeviceRequest) returns (ActivateDeviceResponse) {
+        option (google.api.http) = {
+            post: "/api/devices/{devEUI}/activate"
+            body: "*"
+        };
+    }
+
+    // GetActivation returns the current activation details of the device (OTAA and ABP).
+    rpc GetActivation(GetDeviceActivationRequest) returns (GetDeviceActivationResponse) {
+        option (google.api.http) = {
+            get: "/api/devices/{devEUI}/activation"
+        };
+    }
+
+    // GetRandomDevAddr returns a random DevAddr taking the NwkID prefix into account.
+    rpc GetRandomDevAddr(GetRandomDevAddrRequest) returns (GetRandomDevAddrResponse) {
+        option (google.api.http) = {
+            post: "/api/devices/{devEUI}/getRandomDevAddr"
+        };
+    }
+
+    // StreamFrameLogs streams the uplink and downlink frame-logs for the given DevEUI.
+    // Note: these are the raw LoRaWAN frames and this endpoint is intended for debugging.
+    rpc StreamFrameLogs(StreamDeviceFrameLogsRequest) returns (stream StreamDeviceFrameLogsResponse) {
+        option (google.api.http) = {
+            get: "/api/devices/{devEUI}/frames"
+        };
+    }
+}
+
+message DeviceKeys {
+    // HEX encoded application key.
+    string appKey = 1;
+}
+
+message CreateDeviceRequest {
+    // Hex encoded DevEUI.
+    string devEUI = 1; 
+    
+    // Name of the device (if left blank, it will be set to the DevEUI).
+    string name = 9;
+
+    // ID of the application to which the device must be added.
+    int64 applicationID = 13;
+
+    // Description of the device.
+    string description = 14;
+
+    // DeviceProfileID attached to the device.
+    string deviceProfileID = 18;
+}
+
+message CreateDeviceResponse {}
+
+message GetDeviceRequest {
+    // Hex encoded DevEUI of the device.
+    string devEUI = 1;
+}
+
+message GetDeviceResponse {
+    // Hex encoded DevEUI.
+    string devEUI = 1; 
+    
+    // Name of the device (if left blank, it will be set to the DevEUI).
+    string name = 9;
+
+    // ID of the application to which the device must be added.
+    int64 applicationID = 13;
+
+    // Description of the device.
+    string description = 14;
+
+    // DeviceProfileID attached to the device.
+    string deviceProfileID = 18;
+
+    // The device battery status
+    // 0:      The end-device is connected to an external power source
+    // 1..254: The battery level, 1 being at minimum and 254 being at maximum
+    // 255:    The end-device was not able to measure the battery level
+    // 256:    The device-status is not available.
+    uint32 deviceStatusBattery = 19;
+
+    // The device margin status
+    // -32..32: The demodulation SNR ration in dB
+    // 256:     The device-status is not available.
+    int32  deviceStatusMargin = 20;
+
+    // The last time the application-server received any data from the device,
+    // or an empty string when the device never sent any data.
+    string lastSeenAt = 21;
+};
+
+message DeleteDeviceRequest {
+    // Hex encoded DevEUI of the device.
+    string devEUI = 1;
+}
+
+message DeleteDeviceResponse {}
+
+message ListDeviceByApplicationIDRequest {
+    // ID of the application for which to list the devices.
+    int64 applicationID = 3;
+
+    // Max number of devices to return in the result-set.
+    int64 limit = 1;
+
+	// Offset of the result-set (for pagination).
+	int64 offset = 2;
+
+	// Search against name or DevEUI
+	string search = 4;
+}
+
+message DeviceListItem {
+    // Hex encoded DevEUI.
+    string devEUI = 1; 
+    
+    // Name of the device (if left blank, it will be set to the DevEUI).
+    string name = 9;
+
+    // ID of the application to which the device must be added.
+    int64 applicationID = 13;
+
+    // Description of the device.
+    string description = 14;
+
+    // DeviceProfileID attached to the device.
+    string deviceProfileID = 18;
+
+    // Device-profile name.
+    string deviceProfileName = 19;
+
+    // The device battery status
+    // 0:      The end-device is connected to an external power source
+    // 1..254: The battery level, 1 being at minimum and 254 being at maximum
+    // 255:    The end-device was not able to measure the battery level
+    // 256:    The device-status is not available.
+    uint32 deviceStatusBattery = 20;
+
+    // The device margin status
+    // -32..32: The demodulation SNR ration in dB
+    // 256:     The device-status is not available.
+    int32  deviceStatusMargin = 21;
+
+    // The last time the application-server received any data from the device,
+    // or an empty string when the device never sent any data.
+    string lastSeenAt = 22;
+}
+
+message ListDeviceResponse {
+    // Total number of devices available within the result-set.
+    int64 totalCount = 1;
+
+    // Devices within this result-set.
+    repeated DeviceListItem result = 2;
+}
+
+
+message UpdateDeviceRequest {
+    // Hex encoded DevEUI.
+    string devEUI = 1; 
+    
+    // Name of the device (if left blank, it will be set to the DevEUI).
+    string name = 9;
+
+    // ID of the application to which the device must be added.
+    int64 applicationID = 13;
+
+    // Description of the device.
+    string description = 14;
+
+    // DeviceProfileID attached to the device.
+    string deviceProfileID = 18;
+}
+
+message UpdateDeviceResponse {}
+
+message CreateDeviceKeysRequest {
+    // Hex encoded DevEUI of the device.
+    string devEUI = 1;
+
+    DeviceKeys deviceKeys = 2;
+}
+
+message CreateDeviceKeysResponse {}
+
+message GetDeviceKeysRequest {
+    // Hex encoded DevEUI of the device.
+    string devEUI = 1;
+}
+
+message GetDeviceKeysResponse {
+    DeviceKeys deviceKeys = 1;
+}
+
+message UpdateDeviceKeysRequest {
+    // Hex encoded DevEUI of the device.
+    string devEUI = 1;
+
+    DeviceKeys deviceKeys = 2;
+}
+
+message UpdateDeviceKeysResponse {}
+
+message DeleteDeviceKeysRequest {
+    // Hex encoded DevEUI of the device.
+    string devEUI = 1;
+}
+
+message DeleteDeviceKeysResponse {}
+
+message ActivateDeviceRequest {
+    // Hex encoded DevEUI of the device to activate.
+    string devEUI = 1;
+
+    // Hex encoded DevAddr.
+    string devAddr = 2;
+
+    // Hex encoded AppSKey.
+    string appSKey = 3;
+
+    // Hex encoded NwkSKey.
+    string nwkSKey = 4;
+
+    // Uplink frame-counter.
+    uint32 fCntUp = 5;
+
+    // Downlink frame-counter.
+    uint32 fCntDown = 6;
+
+    // Skip frame-counter checks (this is insecure, but could be helpful for debugging).
+    bool skipFCntCheck = 7;
+}
+
+message ActivateDeviceResponse {}
+
+message GetDeviceActivationRequest {
+    // Hex encoded DevEUI of the device.
+    string devEUI = 1;
+}
+
+message GetDeviceActivationResponse {
+    // Hex encoded DevAddr.
+    string devAddr = 1;
+
+    // Hex encoded AppSKey.
+    string appSKey = 2;
+
+    // Hex encoded NwkSKey.
+    string nwkSKey = 3;
+
+    // Uplink frame-counter.
+    uint32 fCntUp = 4;
+
+    // Downlink frame-counter.
+    uint32 fCntDown = 5;
+
+    // Skip frame-counter checks (this is insecure, but could be helpful for debugging).
+    bool skipFCntCheck = 6;
+}
+
+message GetRandomDevAddrRequest {
+    // Hex encoded DevEUI of the device to activate.
+    string devEUI = 1;
+}
+
+message GetRandomDevAddrResponse {
+    // Hex encoded DevAddr.
+    string devAddr = 1;
+}
+
+message StreamDeviceFrameLogsRequest {
+    // Hex encoded DevEUI.
+    string devEUI = 1;
+}
+
+message StreamDeviceFrameLogsResponse {
+    // Contains zero or one uplink frame.
+    repeated UplinkFrameLog uplinkFrames = 1;
+
+    // Contains zero or one downlink frame.
+    repeated DownlinkFrameLog downlinkFrames = 2;
+}

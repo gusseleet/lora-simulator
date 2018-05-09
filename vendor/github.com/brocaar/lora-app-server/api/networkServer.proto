@@ -1,0 +1,176 @@
+syntax = "proto3";
+
+package api;
+
+// for grpc-gateway
+import "google/api/annotations.proto";
+
+// NetworkServer is the service managing network-servers.
+service NetworkServer {
+    // Create creates the given network-server.
+    rpc Create(CreateNetworkServerRequest) returns (CreateNetworkServerResponse) {
+        option(google.api.http) = {
+            post: "/api/network-servers"
+            body: "*"
+        };
+    }
+
+    // Get returns the network-server matching the given id.
+    rpc Get(GetNetworkServerRequest) returns (GetNetworkServerResponse) {
+        option(google.api.http) = {
+            get: "/api/network-servers/{id}"
+        };
+    }
+
+    // Update updates the given network-server.
+    rpc Update(UpdateNetworkServerRequest) returns (UpdateNetworkServerResponse) {
+        option(google.api.http) = {
+            put: "/api/network-servers/{id}"
+            body: "*"
+        };
+    }
+
+    // Delete deletes the network-server matching the given id.
+    rpc Delete(DeleteNetworkServerRequest) returns (DeleteNetworkServerResponse) {
+        option(google.api.http) = {
+            delete: "/api/network-servers/{id}"
+        };
+    };
+
+    // List lists the available network-servers.
+    rpc List(ListNetworkServerRequest) returns (ListNetworkServerResponse) {
+        option(google.api.http) = {
+            get: "/api/network-servers"
+        };
+    }
+}
+
+message CreateNetworkServerRequest {
+    // Name of the network-server.
+    string name = 1;
+
+    // hostname:ip of the network-server.
+    string server = 2;
+
+    // ca certificate for connecting to the network-server
+    string caCert = 3;
+
+    // tls (client) certificate for connecting to the network-server
+    string tlsCert = 4;
+
+    // tls (client) key for connecting to the network-server
+    string tlsKey = 5;
+
+    // routing-profile ca certificate (used by the network-server to connect
+    // back to the application-server)
+    string routingProfileCACert = 6;
+
+    // routing-profile tls certificate (used by the network-server to connect
+    // back to the application-server)
+    string routingProfileTLSCert = 7;
+
+    // routing-profile tls key (used by the network-server to connect
+    // back to the application-server)
+    string routingProfileTLSKey = 8;
+}
+
+message CreateNetworkServerResponse {
+    // ID of the network-server.
+    int64 id = 1;
+}
+
+message GetNetworkServerRequest {
+    // ID of the network-server.
+    int64 id = 1;
+}
+
+message GetNetworkServerResponse {
+    // ID of the network-server.
+    int64 id = 1;
+
+    // Timestamp when the record was created.
+    string createdAt = 2;
+
+    // Timestamp when the record was last updated.
+    string updatedAt = 3;
+
+    // Name of the network-server.
+    string name = 4;
+
+    // hostname:ip of the network-server.
+    string server = 5;
+
+    // ca certificate for connecting to the network-server
+    string caCert = 6;
+
+    // tls (client) certificate for connecting to the network-server
+    string tlsCert = 7;
+
+    // routing-profile ca certificate (used by the network-server to connect
+    // back to the application-server)
+    string routingProfileCACert = 8;
+
+    // routing-profile tls certificate (used by the network-server to connect
+    // back to the application-server)
+    string routingProfileTLSCert = 9;
+}
+
+message UpdateNetworkServerRequest {
+    // ID of the network-server.
+    int64 id = 1;
+
+    // Name of the network-server.
+    string name = 2;
+
+    // hostname:ip of the network-server.
+    string server = 3;
+
+    // ca certificate for connecting to the network-server
+    string caCert = 4;
+
+    // tls (client) certificate for connecting to the network-server
+    string tlsCert = 5;
+
+    // tls (client) key for connecting to the network-server
+    string tlsKey = 6;
+
+    // routing-profile ca certificate (used by the network-server to connect
+    // back to the application-server)
+    string routingProfileCACert = 7;
+
+    // routing-profile tls certificate (used by the network-server to connect
+    // back to the application-server)
+    string routingProfileTLSCert = 8;
+
+    // routing-profile tls key (used by the network-server to connect
+    // back to the application-server)
+    string routingProfileTLSKey = 9;
+}
+
+message UpdateNetworkServerResponse {}
+
+message DeleteNetworkServerRequest {
+    // ID of the network-server.
+    int64 id = 1;
+}
+
+message DeleteNetworkServerResponse {}
+
+message ListNetworkServerRequest {
+    // Max number of items to return.
+    int64 limit = 1;
+
+    // Offset in the result-set (for pagination).
+    int64 offset = 2;
+
+    // Organization id to filter on.
+    int64 organizationID = 3;
+}
+
+message ListNetworkServerResponse {
+    // Total number of network-servers.
+    int64 totalCount = 1;
+
+    // Network-servers within the result-set.
+    repeated GetNetworkServerResponse result = 2;
+}

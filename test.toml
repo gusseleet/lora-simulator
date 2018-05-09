@@ -1,0 +1,9 @@
+MqttAdress="35.158.200.138:1883"
+MqttUser="loraserver_gw"
+MqttPassword="ChpP2eeW1Tck"
+GatewayMac="f1e2d3c4b5a60000"
+NwsHexkey="29014c17ae649823bf5b6b0c64c234e5"
+AppHexKey="3a8f137683476a467ea9dddf4a728920"
+DevHexAddr="07c0e3e8"
+AppEUI=[1, 1, 1, 1, 1, 1, 1, 1]
+DevEUI=[22, 22, 22, 22, 22, 22, 22, 22]

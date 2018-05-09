@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package api;
+
+// for grpc-gateway
+import "google/api/annotations.proto";
+
+// DeviceQueue is the service managing the downlink data queue.
+service DeviceQueue {
+    // Enqueue adds the given item to the device-queue.
+    rpc Enqueue(EnqueueDeviceQueueItemRequest) returns (EnqueueDeviceQueueItemResponse) {
+        option(google.api.http) = {
+            post: "/api/devices/{devEUI}/queue"
+            body: "*"
+        };
+    }
+
+    // Flush flushes the downlink device-queue.
+    rpc Flush(FlushDeviceQueueRequest) returns (FlushDeviceQueueResponse) {
+        option(google.api.http) = {
+            delete: "/api/devices/{devEUI}/queue"
+        };
+    }
+
+    // List lists the items in the device-queue.
+    rpc List(ListDeviceQueueItemsRequest) returns (ListDeviceQueueItemsResponse) {
+        option(google.api.http) = {
+            get: "/api/devices/{devEUI}/queue"
+        };
+    }
+}
+
+message EnqueueDeviceQueueItemRequest {
+    // Hex encoded DevEUI of the node.
+    string devEUI = 1;
+
+    // Random reference (used on ack notification).
+    string reference = 2;
+
+    // Is an ACK required from the node.
+    bool confirmed = 3;
+
+    // FPort used (must be >0)
+    uint32 fPort = 4;
+
+    // Base64 encoded data (or use the jsonObject when an application codec has been configured).
+    bytes data = 5;
+
+    // String containing a JSON object (to be enqueued by the application codec).
+    string jsonObject = 6;
+}
+
+message EnqueueDeviceQueueItemResponse {}
+
+message FlushDeviceQueueRequest {
+    // Hex encoded DevEUI of the node.
+    string devEUI = 1;
+}
+
+message FlushDeviceQueueResponse {}
+
+message DeviceQueueItem {
+    // Hex encoded DevEUI of the device.
+    string devEUI = 2;
+
+    // Random reference (used on ack notification).
+    string reference = 3;
+
+    // Is an ACK required from the device.
+    bool confirmed = 4;
+
+    // FPort used (must be >0).
+    uint32 fPort = 6;
+
+    // Base64 encoded data.
+    bytes data = 7;   
+
+    // FCnt of the queue item.
+    uint32 fCnt = 8;
+}
+
+message ListDeviceQueueItemsRequest {
+    // Hex encoded DevEUI of the node.
+    string devEUI = 1;
+}
+
+message ListDeviceQueueItemsResponse {
+    repeated DeviceQueueItem items = 1;
+}
